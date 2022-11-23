@@ -3,6 +3,7 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +101,68 @@ public class TourGuideService {
 		
 		return nearbyAttractions;
 	}
+	
+	
+	
+	
+	
+	
+
+	
+	public List<Attraction> getFiveClosestAttractions(VisitedLocation visitedLocation){
+		List<Attraction> fiveClosest = new ArrayList<>();
+		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
+		
+		Attraction attraction = null;
+		double closest = rewardsService.getDistance(getAllAttractions.get(0), visitedLocation.location);
+
+		while(fiveClosest.size() < 5) {
+			for(int i = 0; i < getAllAttractions.size(); i++) {
+				if (rewardsService.getDistance(getAllAttractions.get(i), visitedLocation.location) < closest) {
+					closest = rewardsService.getDistance(getAllAttractions.get(i), visitedLocation.location);
+					attraction = getAllAttractions.get(i);
+				}
+			}
+			getAllAttractions.remove(attraction);
+			fiveClosest.add(attraction);
+		}
+	
+		return fiveClosest;
+	}
+	
+
+	//TODO : add user rewards
+	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation){
+		List<Object> attractionsInformations = new ArrayList<>();
+		
+		double attractionLatitude = rewardsService.getLatitude(attraction);
+		double attractionLongitude = rewardsService.getLongitude(attraction);
+		String attractionName = rewardsService.getAttractionName(attraction);
+		double userLatitude = rewardsService.getLatitude(visitedLocation.location);
+		double userLongitude = rewardsService.getLongitude(visitedLocation.location);
+		double getDistance = rewardsService.getDistance(attraction, visitedLocation.location);
+		
+		attractionsInformations.add(Arrays.asList(attractionLatitude, attractionLongitude, attractionName, userLatitude, userLongitude, getDistance));
+		return attractionsInformations;
+	}
+	
+	
+	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation) {
+		List<Object> informationsNearAttractions = new ArrayList<>();
+		
+		for(int i = 0; i < getFiveClosestAttractions(visitedLocation).size(); i++) {
+			informationsNearAttractions.add(getAttractionsInformations(getFiveClosestAttractions(visitedLocation).get(i), visitedLocation));
+		}
+		
+		return informationsNearAttractions;
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 	private void addShutDownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() { 

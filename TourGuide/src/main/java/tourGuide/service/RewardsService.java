@@ -77,4 +77,19 @@ public class RewardsService {
         return statuteMiles;
 	}
 
+	
+	
+	
+	
+	public double getLongitude(Location location) {
+		return Math.toRadians(location.longitude);
+	}
+	
+	public double getLatitude(Location location) {
+		return Math.toRadians(location.latitude);
+	}
+	
+	public String getAttractionName(Attraction attraction) {
+		return attraction.attractionName;
+	}
 }
