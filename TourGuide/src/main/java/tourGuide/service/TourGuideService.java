@@ -131,8 +131,7 @@ public class TourGuideService {
 	}
 	
 
-	//TODO : add user rewards
-	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation){
+	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation, User user){
 		List<Object> attractionsInformations = new ArrayList<>();
 		
 		double attractionLatitude = rewardsService.getLatitude(attraction);
@@ -141,23 +140,39 @@ public class TourGuideService {
 		double userLatitude = rewardsService.getLatitude(visitedLocation.location);
 		double userLongitude = rewardsService.getLongitude(visitedLocation.location);
 		double getDistance = rewardsService.getDistance(attraction, visitedLocation.location);
+		int getReward = rewardsService.getRewardPoints(attraction, user);
 		
-		attractionsInformations.add(Arrays.asList(attractionLatitude, attractionLongitude, attractionName, userLatitude, userLongitude, getDistance));
+		attractionsInformations.add(Arrays.asList(attractionLatitude, attractionLongitude, attractionName, userLatitude, userLongitude, getDistance, getReward));
 		return attractionsInformations;
 	}
 	
 	
-	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation) {
+	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation, User user) {
 		List<Object> informationsNearAttractions = new ArrayList<>();
 		
 		for(int i = 0; i < getFiveClosestAttractions(visitedLocation).size(); i++) {
-			informationsNearAttractions.add(getAttractionsInformations(getFiveClosestAttractions(visitedLocation).get(i), visitedLocation));
+			informationsNearAttractions.add(getAttractionsInformations(getFiveClosestAttractions(visitedLocation).get(i), visitedLocation, user));
 		}
 		
 		return informationsNearAttractions;
 	}
 	
 	
+
+	public List<Object> getAllCurrentLocations(){
+		List<Object> allCurrentLocations = new ArrayList<>();
+		
+		for(int i = 0; i < getAllUsers().size(); i++) {
+			User user = getAllUsers().get(i);
+			VisitedLocation visitedLocation = getUserLocation(user);
+			double userLatitude = rewardsService.getLatitude(visitedLocation.location);
+			double userLongitude = rewardsService.getLongitude(visitedLocation.location);
+			
+			allCurrentLocations.add(Arrays.asList(user.getUserId(), Arrays.asList(userLatitude, userLongitude)));
+		}
+		
+		return allCurrentLocations;
+	}
 	
 	
 	
