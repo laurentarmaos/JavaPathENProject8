@@ -108,29 +108,33 @@ public class TourGuideService {
 	
 	
 
-	
+	// get the five closests attractions of user current position
 	public List<Attraction> getFiveClosestAttractions(VisitedLocation visitedLocation){
 		List<Attraction> fiveClosest = new ArrayList<>();
 		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
 		
-		Attraction attraction = null;
-		double closest = rewardsService.getDistance(getAllAttractions.get(0), visitedLocation.location);
-
+		Attraction closestAttraction = getAllAttractions.get(0);
+		double closest = rewardsService.getDistance(closestAttraction, visitedLocation.location);
+		
 		while(fiveClosest.size() < 5) {
 			for(int i = 0; i < getAllAttractions.size(); i++) {
 				if (rewardsService.getDistance(getAllAttractions.get(i), visitedLocation.location) < closest) {
-					closest = rewardsService.getDistance(getAllAttractions.get(i), visitedLocation.location);
-					attraction = getAllAttractions.get(i);
+					closestAttraction = getAllAttractions.get(i);
+					closest = rewardsService.getDistance(closestAttraction, visitedLocation.location);
+					
 				}
 			}
-			getAllAttractions.remove(attraction);
-			fiveClosest.add(attraction);
+			fiveClosest.add(closestAttraction);
+			getAllAttractions.remove(closestAttraction);
+			closestAttraction = getAllAttractions.get(0);
+			closest = rewardsService.getDistance(closestAttraction, visitedLocation.location);
 		}
 	
 		return fiveClosest;
 	}
 	
 
+	// get specifics informations of attractions
 	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation, User user){
 		List<Object> attractionsInformations = new ArrayList<>();
 		
@@ -142,11 +146,19 @@ public class TourGuideService {
 		double getDistance = rewardsService.getDistance(attraction, visitedLocation.location);
 		int getReward = rewardsService.getRewardPoints(attraction, user);
 		
-		attractionsInformations.add(Arrays.asList(attractionLatitude, attractionLongitude, attractionName, userLatitude, userLongitude, getDistance, getReward));
+		attractionsInformations.add(attractionLatitude);
+		attractionsInformations.add(attractionLongitude);
+		attractionsInformations.add(attractionName);
+		attractionsInformations.add(userLatitude);
+		attractionsInformations.add(userLongitude);
+		attractionsInformations.add(getDistance);
+		attractionsInformations.add(getReward);
+		
 		return attractionsInformations;
 	}
 	
 	
+	//get list of five closests attraction with the informations required
 	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation, User user) {
 		List<Object> informationsNearAttractions = new ArrayList<>();
 		

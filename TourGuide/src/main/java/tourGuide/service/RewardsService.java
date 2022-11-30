@@ -82,11 +82,11 @@ public class RewardsService {
 	
 	
 	public double getLongitude(Location location) {
-		return Math.toRadians(location.longitude);
+		return location.longitude;
 	}
 	
 	public double getLatitude(Location location) {
-		return Math.toRadians(location.latitude);
+		return location.latitude;
 	}
 	
 	public String getAttractionName(Attraction attraction) {
