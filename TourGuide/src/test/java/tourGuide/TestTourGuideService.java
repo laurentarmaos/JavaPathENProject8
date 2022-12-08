@@ -6,11 +6,15 @@ import static org.mockito.ArgumentMatchers.intThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.assertj.core.util.Arrays;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.jsoniter.output.JsonStream;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
@@ -24,6 +28,11 @@ import tourGuide.user.User;
 import tripPricer.Provider;
 
 public class TestTourGuideService {
+	
+	@Before
+	public void setUp() {
+		Locale.setDefault(Locale.US);
+	}
 
 	@Test
 	public void getUserLocation() {
@@ -173,7 +182,7 @@ public class TestTourGuideService {
 		
 		
 		for(int i = 0; i<fiveClosest.size(); i++) {
-			System.out.println(fiveClosest.get(i).attractionName);
+			System.out.println(JsonStream.serialize(fiveClosest.get(i)));
 		}
 		
 		assertEquals(5, fiveClosest.size());
@@ -215,15 +224,14 @@ public class TestTourGuideService {
 		attractionsInformations.add(getReward);
 		
 		
-		System.out.println(attractionsInformations);
+		System.out.println(JsonStream.serialize(attractionsInformations));
 		
 		assertEquals(1.0, attractionsInformations.get(0));
 		assertEquals(1.0, attractionsInformations.get(1));
 		assertEquals("attractionName", attractionsInformations.get(2));
 		assertEquals(0.0, attractionsInformations.get(3));
 		assertEquals(0.0, attractionsInformations.get(4));
-		//assertEquals(null, attractionsInformations.get(5));
-		//assertEquals(null, attractionsInformations.get(6));
+		assertEquals(97.64439545235415, attractionsInformations.get(5));
 	}
 	
 	
@@ -231,6 +239,7 @@ public class TestTourGuideService {
 	public void getInformationsNearAttractions() {
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+		InternalTestHelper.setInternalUserNumber(0);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -243,6 +252,64 @@ public class TestTourGuideService {
 		}
 		
 		System.out.println(informationsNearAttractions);
+		
+		
+		assertEquals(5, informationsNearAttractions.size());
+	}
+	
+	@Test
+	public void getAllCurrentLocations() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+		InternalTestHelper.setInternalUserNumber(0);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		
+		User user1 = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
+
+		tourGuideService.addUser(user1);
+		tourGuideService.addUser(user2);
+		
+		List<User> allUsers = tourGuideService.getAllUsers();
+
+		tourGuideService.tracker.stopTracking();
+		
+		VisitedLocation user1visitedLocation1 = new VisitedLocation(user1.getUserId(), new Location(0, 0), null);
+		VisitedLocation user1visitedLocation2 = new VisitedLocation(user1.getUserId(), new Location(1, 1), null);
+		tourGuideService.addUserLocation(user1, user1visitedLocation1);
+		tourGuideService.addUserLocation(user1, user1visitedLocation2);
+		
+		VisitedLocation user2visitedLocation1 = new VisitedLocation(user2.getUserId(), new Location(0, 0), null);
+		VisitedLocation user2visitedLocation2 = new VisitedLocation(user2.getUserId(), new Location(2, 2), null);
+		VisitedLocation user2visitedLocation3 = new VisitedLocation(user2.getUserId(), new Location(3, 3), null);
+		tourGuideService.addUserLocation(user2, user2visitedLocation1);
+		tourGuideService.addUserLocation(user2, user2visitedLocation2);
+		tourGuideService.addUserLocation(user2, user2visitedLocation3);
+		
+		
+		List<Object> allCurrentLocations = new ArrayList<>();
+		
+		for(int i = 0; i < allUsers.size(); i++) {
+			User user = allUsers.get(i);
+			VisitedLocation visitedLocation = user.getLastVisitedLocation();
+			double userLatitude = rewardsService.getLatitude(visitedLocation.location);
+			double userLongitude = rewardsService.getLongitude(visitedLocation.location);
+			
+			List<Double> location = new ArrayList<>();
+			location.add(userLatitude);
+			location.add(userLongitude);
+			
+			List<Object> userLocation = new ArrayList<>();	
+			userLocation.add(user.getUserId());			
+			userLocation.add(location);
+			
+			allCurrentLocations.add(userLocation);
+			
+		}
+		System.out.println(allCurrentLocations);
+		
+		
+		assertEquals(allCurrentLocations.size(), 2);
 	}
 	
 }

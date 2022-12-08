@@ -170,17 +170,30 @@ public class TourGuideService {
 	}
 	
 	
+	
+	public void addUserLocation(User user, VisitedLocation visitedLocation){
+		user.getVisitedLocations().add(visitedLocation);
+	}
 
 	public List<Object> getAllCurrentLocations(){
 		List<Object> allCurrentLocations = new ArrayList<>();
 		
 		for(int i = 0; i < getAllUsers().size(); i++) {
 			User user = getAllUsers().get(i);
-			VisitedLocation visitedLocation = getUserLocation(user);
+			VisitedLocation visitedLocation = user.getLastVisitedLocation();
+			
 			double userLatitude = rewardsService.getLatitude(visitedLocation.location);
 			double userLongitude = rewardsService.getLongitude(visitedLocation.location);
 			
-			allCurrentLocations.add(Arrays.asList(user.getUserId(), Arrays.asList(userLatitude, userLongitude)));
+			List<Double> location = new ArrayList<>();
+			location.add(userLatitude);
+			location.add(userLongitude);
+			
+			List<Object> userLocation = new ArrayList<>();	
+			userLocation.add(user.getUserId());			
+			userLocation.add(location);
+			
+			allCurrentLocations.add(userLocation);
 		}
 		
 		return allCurrentLocations;
