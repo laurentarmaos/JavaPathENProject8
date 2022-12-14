@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,6 +40,7 @@ public class TourGuideService {
 	private final TripPricer tripPricer = new TripPricer();
 	public final Tracker tracker;
 	boolean testMode = true;
+	public ExecutorService executorService;
 	
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -85,7 +90,23 @@ public class TourGuideService {
 	}
 	
 	public VisitedLocation trackUserLocation(User user) {
-		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+		
+		executorService = Executors.newFixedThreadPool(1);
+		
+		Future<VisitedLocation> futureVisitedLocation = executorService.submit(
+				()-> gpsUtil.getUserLocation(user.getUserId())
+				);
+		
+		VisitedLocation visitedLocation = null;
+		try {
+			visitedLocation = futureVisitedLocation.get();
+		} catch (InterruptedException | ExecutionException e) {
+			
+			e.printStackTrace();
+		}
+		
+		
+		//VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 		user.addToVisitedLocations(visitedLocation);
 		rewardsService.calculateRewards(user);
 		return visitedLocation;
@@ -113,7 +134,19 @@ public class TourGuideService {
 		List<Attraction> fiveClosest = new ArrayList<>();
 		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
 		
-		Attraction closestAttraction = getAllAttractions.get(0);
+		executorService = Executors.newFixedThreadPool(1);
+		
+		Future<Attraction> futureClosestAttraction = executorService.submit(
+	            ()-> getAllAttractions.get(0));
+		Attraction closestAttraction = null;
+		try {
+			closestAttraction = futureClosestAttraction.get();
+		} catch (InterruptedException | ExecutionException e) {
+			
+			e.printStackTrace();
+		}
+			
+		//Attraction closestAttraction = getAllAttractions.get(0);
 		double closest = rewardsService.getDistance(closestAttraction, visitedLocation.location);
 		
 		while(fiveClosest.size() < 5) {

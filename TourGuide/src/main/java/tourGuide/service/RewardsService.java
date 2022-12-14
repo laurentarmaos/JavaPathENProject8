@@ -1,6 +1,10 @@
 package tourGuide.service;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,7 @@ public class RewardsService {
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
+	public ExecutorService executorService;
 	
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
@@ -37,8 +42,35 @@ public class RewardsService {
 	}
 	
 	public void calculateRewards(User user) {
-		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
+		
+		executorService = Executors.newFixedThreadPool(2);
+		
+		Future<List<VisitedLocation>> futureUserLocations = executorService.submit(
+				()-> user.getVisitedLocations()
+				);
+		Future<List<Attraction>> futureAttractions = executorService.submit(
+				()-> gpsUtil.getAttractions()
+				);
+		
+		List<VisitedLocation> userLocations = null;
+		List<Attraction> attractions = null;
+		
+		try {
+			userLocations = futureUserLocations.get();
+		} catch (InterruptedException | ExecutionException e) {
+			
+			e.printStackTrace();
+		}
+		
+		try {
+			attractions = futureAttractions.get();
+		} catch (InterruptedException | ExecutionException e) {
+			
+			e.printStackTrace();
+		}
+		
+//		List<VisitedLocation> userLocations = user.getVisitedLocations();
+//		List<Attraction> attractions = gpsUtil.getAttractions();
 		
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
