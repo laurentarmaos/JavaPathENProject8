@@ -1,6 +1,8 @@
 package tourGuide.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,34 +45,9 @@ public class RewardsService {
 	
 	public void calculateRewards(User user) {
 		
-		executorService = Executors.newFixedThreadPool(2);
+		List<VisitedLocation> userLocations = user.getVisitedLocations();
+		List<Attraction> attractions = gpsUtil.getAttractions();
 		
-		Future<List<VisitedLocation>> futureUserLocations = executorService.submit(
-				()-> user.getVisitedLocations()
-				);
-		Future<List<Attraction>> futureAttractions = executorService.submit(
-				()-> gpsUtil.getAttractions()
-				);
-		
-		List<VisitedLocation> userLocations = null;
-		List<Attraction> attractions = null;
-		
-		try {
-			userLocations = futureUserLocations.get();
-		} catch (InterruptedException | ExecutionException e) {
-			
-			e.printStackTrace();
-		}
-		
-		try {
-			attractions = futureAttractions.get();
-		} catch (InterruptedException | ExecutionException e) {
-			
-			e.printStackTrace();
-		}
-		
-//		List<VisitedLocation> userLocations = user.getVisitedLocations();
-//		List<Attraction> attractions = gpsUtil.getAttractions();
 		
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
@@ -81,6 +58,9 @@ public class RewardsService {
 				}
 			}
 		}
+		
+		
+		
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
