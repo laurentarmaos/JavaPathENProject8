@@ -13,9 +13,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
@@ -27,8 +29,14 @@ import tourGuide.user.UserReward;
 public class TestRewardsService {
 	
 	GpsUtil gpsUtil = mock(GpsUtil.class);
-	RewardsService rewardsService = null;
-	TourGuideService tourGuideService = null;
+	//RewardsService rewardsService = null;
+	//TourGuideService tourGuideService = null;
+		
+	@InjectMocks
+	TourGuideService tourGuideService;
+	
+	@InjectMocks
+	RewardsService rewardsService;
 	
 	@Before
 	public void setUp() {
@@ -43,14 +51,14 @@ public class TestRewardsService {
 	public void userGetRewards() {
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		//Attraction attraction = gpsUtil.getAttractions().get(0);
+
 		Attraction attraction = new Attraction("attraction", "city", "state", 1, 1);
 		
 		List<Attraction> getAllAttractions = new ArrayList<>();
 		getAllAttractions.add(attraction);
 		
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-
+		System.out.println(user.getLastVisitedLocation());
 		
 		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
@@ -63,7 +71,6 @@ public class TestRewardsService {
 	
 	@Test
 	public void isWithinAttractionProximity() {
-		//Attraction attraction = gpsUtil.getAttractions().get(0);
 		Attraction attraction = new Attraction("attraction", "city", "state", 1, 1);
 		assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
 	}

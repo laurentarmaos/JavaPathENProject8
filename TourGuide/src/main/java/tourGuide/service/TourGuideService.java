@@ -3,7 +3,6 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -123,9 +122,10 @@ public class TourGuideService {
 	public List<Attraction> getFiveClosestAttractions(VisitedLocation visitedLocation){
 		List<Attraction> fiveClosest = new ArrayList<>();
 		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
-			
+		
 		Attraction closestAttraction = getAllAttractions.get(0);
 		double closest = rewardsService.getDistance(closestAttraction, visitedLocation.location);
+		
 		
 		while(fiveClosest.size() < 5) {
 			for(int i = 0; i < getAllAttractions.size(); i++) {
@@ -148,12 +148,12 @@ public class TourGuideService {
 	// get specifics informations of attractions
 	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation, User user){
 		List<Object> attractionsInformations = new ArrayList<>();
-		
-		double attractionLatitude = rewardsService.getLatitude(attraction);
-		double attractionLongitude = rewardsService.getLongitude(attraction);
-		String attractionName = rewardsService.getAttractionName(attraction);
-		double userLatitude = rewardsService.getLatitude(visitedLocation.location);
-		double userLongitude = rewardsService.getLongitude(visitedLocation.location);
+
+		double attractionLatitude = attraction.latitude;
+		double attractionLongitude = attraction.longitude;
+		String attractionName = attraction.attractionName;
+		double userLatitude = visitedLocation.location.latitude;
+		double userLongitude = visitedLocation.location.longitude;
 		double getDistance = rewardsService.getDistance(attraction, visitedLocation.location);
 		int getReward = rewardsService.getRewardPoints(attraction, user);
 		
@@ -173,17 +173,16 @@ public class TourGuideService {
 	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation, User user) {
 		List<Object> informationsNearAttractions = new ArrayList<>();
 		
-		for(int i = 0; i < getFiveClosestAttractions(visitedLocation).size(); i++) {
-			
-			Future<List<Attraction>> future = executorService.submit(()->getFiveClosestAttractions(visitedLocation));
-			
-//			informationsNearAttractions.add(getAttractionsInformations(getFiveClosestAttractions(visitedLocation).get(i), visitedLocation, user));
-			
-			try {
+		Future<List<Attraction>> future = executorService.submit(()->getFiveClosestAttractions(visitedLocation));
+		
+		try {
+			for(int i = 0; i < future.get().size(); i++) {
+							
 				informationsNearAttractions.add(getAttractionsInformations(future.get().get(i), visitedLocation, user));
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
 
 				

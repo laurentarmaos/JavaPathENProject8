@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.jsoniter.output.JsonStream;
@@ -38,27 +41,32 @@ import tripPricer.TripPricer;
 public class TestTourGuideService {
 
 	GpsUtil gpsUtil = mock(GpsUtil.class);
-	RewardsService rewardsService = null;
-	TourGuideService tourGuideService = null;
+
+	RewardsService rewardsService;
+	//TourGuideService tourGuideService;
+	
+	@InjectMocks
+	TourGuideService tourGuideService;
+	
 	
 	@Before
 	public void setUp() {
 		Locale.setDefault(Locale.US);
 		
 		rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(10000);
+		InternalTestHelper.setInternalUserNumber(100000);
 		tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 	}
-	
-	
-//	@InjectMocks
-//	TourGuideService tourGuideService;
+
 
 	@Test
 	public void getUserLocation() {
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(new VisitedLocation(user.getUserId(), null, null));
+		//when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(new VisitedLocation(user.getUserId(), null, null));
+		
+		Attraction attraction = new Attraction("attraction1", "city", "state", 1, 1);	
+		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
 		
 		VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
 		tourGuideService.tracker.stopTracking();
@@ -177,6 +185,18 @@ public class TestTourGuideService {
 		assertEquals(attraction4, fiveClosest.get(2));
 		assertEquals(attraction3, fiveClosest.get(3));
 		assertEquals(attraction6, fiveClosest.get(4));
+		
+//		GpsUtil gpsUtil = new GpsUtil();
+//		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+//		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+//		InternalTestHelper.setInternalUserNumber(10000);
+//
+//		
+//		Location userlocation = new Location(0, 0);
+//		VisitedLocation visitedLocation = new VisitedLocation(null, userlocation, null);
+//		List<Attraction> list = tourGuideService.getFiveClosestAttractions(visitedLocation);
+//		System.out.println(list);
+//		assertEquals(5, list.size());
 
 	}
 	
