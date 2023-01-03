@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,7 +46,7 @@ public class TestRewardsService {
 		Locale.setDefault(Locale.US);
 		
 		rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(100000);
+		InternalTestHelper.setInternalUserNumber(0);
 		tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 	}
 
@@ -53,19 +56,29 @@ public class TestRewardsService {
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
 		Attraction attraction = new Attraction("attraction", "city", "state", 1, 1);
+		Attraction attraction2 = new Attraction("attraction2", "city", "state", 2, 2);
 		
 		List<Attraction> getAllAttractions = new ArrayList<>();
 		getAllAttractions.add(attraction);
+		getAllAttractions.add(attraction2);
 		
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-		System.out.println(user.getLastVisitedLocation());
+		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction2, new Date()));
 		
 		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
 		
 		tourGuideService.trackUserLocation(user);
+		
 		List<UserReward> userRewards = user.getUserRewards();
 		tourGuideService.tracker.stopTracking();
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		assertEquals(userRewards.size(), 1);
 	}
 	
@@ -78,27 +91,23 @@ public class TestRewardsService {
 	//@Ignore // Needs fixed - can throw ConcurrentModificationException
 	@Test
 	public void nearAllAttractions() {
-//		GpsUtil gpsUtil = new GpsUtil();
-//		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
-//		InternalTestHelper.setInternalUserNumber(1);
-//		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 		Attraction attraction1 = new Attraction("attraction1", "city", "state", 1, 1);
 		Attraction attraction2 = new Attraction("attraction2", "city", "state", 2, 2);
 		
-		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction1, new Date()));
-		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction2, new Date()));
 		List<Attraction> getAllAttractions = new ArrayList<>();
 		getAllAttractions.add(attraction1);
 		getAllAttractions.add(attraction2);
 		
+		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction1, new Date()));
+		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction2, new Date()));
+		
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
 		
-//		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-//		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+		
 		rewardsService.calculateRewards(user);
 		List<UserReward> userRewards = tourGuideService.getUserRewards(user);
 		tourGuideService.tracker.stopTracking();

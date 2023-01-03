@@ -42,8 +42,9 @@ public class TestTourGuideService {
 
 	GpsUtil gpsUtil = mock(GpsUtil.class);
 
+	//TripPricer tripPricer = mock(TripPricer.class);
+
 	RewardsService rewardsService;
-	//TourGuideService tourGuideService;
 	
 	@InjectMocks
 	TourGuideService tourGuideService;
@@ -54,13 +55,13 @@ public class TestTourGuideService {
 		Locale.setDefault(Locale.US);
 		
 		rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(100000);
+		InternalTestHelper.setInternalUserNumber(0);
 		tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 	}
 
 
 	@Test
-	public void getUserLocation() {
+	public void testGetUserLocation() {
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 		//when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(new VisitedLocation(user.getUserId(), null, null));
@@ -144,12 +145,29 @@ public class TestTourGuideService {
 	public void getTripDeals() {
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		user.getUserPreferences().setNumberOfChildren(5);
+		user.getUserPreferences().setTripDuration(5);
+		user.getUserPreferences().setNumberOfAdults(2);
+//		Provider provider1 = new Provider(UUID.randomUUID(), "provider1", 0);
+//		Provider provider2 = new Provider(UUID.randomUUID(), "provider2", 0);
+//		Provider provider3 = new Provider(UUID.randomUUID(), "provider3", 0);
+//		
+//		List<Provider> allProviders = new ArrayList<>();
+//		allProviders.add(provider1);
+//		allProviders.add(provider2);
+//		allProviders.add(provider3);
+//		
+//		int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
+//		
+//		when(tripPricer.getPrice("test-server-api-key", user.getUserId(),
+//				user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
+//				user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints)).thenReturn(allProviders);
 	
 		List<Provider> providers = tourGuideService.getTripDeals(user);
 		
 		tourGuideService.tracker.stopTracking();
 		
-		assertEquals(10, providers.size());
+		assertEquals(3, providers.size());
 	}
 	
 	

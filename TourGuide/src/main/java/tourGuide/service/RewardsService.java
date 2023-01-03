@@ -28,7 +28,7 @@ public class RewardsService {
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
-	public ExecutorService executorService;
+	public ExecutorService executorService = Executors.newFixedThreadPool(600);;
 	
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
@@ -48,7 +48,6 @@ public class RewardsService {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
 		
-		
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
 				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
@@ -58,6 +57,25 @@ public class RewardsService {
 				}
 			}
 		}
+		
+//		Future<List<VisitedLocation>> futureUserLocations = executorService.submit(()-> user.getVisitedLocations());
+//		Future<List<Attraction>> futureAttractions = executorService.submit(()->gpsUtil.getAttractions());
+//		
+//		try {
+//			for(VisitedLocation visitedLocation : futureUserLocations.get()) {
+//				for(Attraction attraction : futureAttractions.get()) {
+//					if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+//						if(nearAttraction(visitedLocation, attraction)) {
+//							user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+//						}
+//					}
+//				}
+//			}
+//		} catch (InterruptedException | ExecutionException e) {
+//			e.printStackTrace();
+//		}
+		
+		
 		
 		
 		

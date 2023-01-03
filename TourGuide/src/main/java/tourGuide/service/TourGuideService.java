@@ -52,7 +52,7 @@ public class TourGuideService {
 			logger.debug("Finished initializing users");
 		}
 		tracker = new Tracker(this);
-		executorService = Executors.newFixedThreadPool(500);
+		executorService = Executors.newFixedThreadPool(600);
 		addShutDownHook();
 	}
 	

@@ -23,7 +23,7 @@ eclipse {
 
 bootJar {
     mainClassName = 'tourGuide'
-    //version =  '1.0.0'
+    version =  '1.0.0'
 }
 
 repositories {
@@ -41,7 +41,7 @@ dependencies {
 	implementation 'org.javamoney:moneta:1.4.2'
 	implementation 'com.jsoniter:jsoniter:0.9.23'
 	// https://mavenlibs.com/maven/dependency/org.mockito/mockito-junit-jupiter
-	implementation 'org.mockito:mockito-junit-jupiter:4.9.0'
+	implementation 'org.mockito:mockito-junit-jupiter:4.10.0'
 	
     implementation name:'gpsUtil', ext:'jar'
     implementation name:'RewardCentral', ext:'jar'
@@ -50,7 +50,6 @@ dependencies {
     testImplementation 'junit:junit'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.6.RELEASE'
 
-    
 }
 
 
