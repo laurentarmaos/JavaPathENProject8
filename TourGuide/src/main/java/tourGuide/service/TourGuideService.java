@@ -52,7 +52,7 @@ public class TourGuideService {
 			logger.debug("Finished initializing users");
 		}
 		tracker = new Tracker(this);
-		executorService = Executors.newFixedThreadPool(600);
+		executorService = Executors.newFixedThreadPool(100);
 		addShutDownHook();
 	}
 	
@@ -101,16 +101,8 @@ public class TourGuideService {
 		return visitedLocation;
 	}
 
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for(Attraction attraction : gpsUtil.getAttractions()) {
-			if(rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
-		
-		return nearbyAttractions;
-	}
+	
+
 	
 	
 	
@@ -188,34 +180,6 @@ public class TourGuideService {
 				
 		return informationsNearAttractions;
 	}
-	
-	
-	
-	
-
-//	public List<Object> getAllCurrentLocations(){
-//		List<Object> allCurrentLocations = new ArrayList<>();
-//		
-//		for(int i = 0; i < getAllUsers().size(); i++) {
-//			User user = getAllUsers().get(i);
-//			VisitedLocation visitedLocation = user.getLastVisitedLocation();
-//			
-//			double userLatitude = rewardsService.getLatitude(visitedLocation.location);
-//			double userLongitude = rewardsService.getLongitude(visitedLocation.location);
-//			
-//			List<Double> location = new ArrayList<>();
-//			location.add(userLatitude);
-//			location.add(userLongitude);
-//			
-//			List<Object> userLocation = new ArrayList<>();	
-//			userLocation.add(user.getUserId());			
-//			userLocation.add(location);
-//			
-//			allCurrentLocations.add(userLocation);
-//		}
-//		
-//		return allCurrentLocations;
-//	}
 	
 	
 	public Map<String, Location> getAllCurrentLocations(){

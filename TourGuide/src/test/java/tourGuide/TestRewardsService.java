@@ -9,9 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -20,7 +17,6 @@ import org.mockito.InjectMocks;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
@@ -29,11 +25,10 @@ import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
+
 public class TestRewardsService {
 	
 	GpsUtil gpsUtil = mock(GpsUtil.class);
-	//RewardsService rewardsService = null;
-	//TourGuideService tourGuideService = null;
 		
 	@InjectMocks
 	TourGuideService tourGuideService;
@@ -46,7 +41,7 @@ public class TestRewardsService {
 		Locale.setDefault(Locale.US);
 		
 		rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
+		InternalTestHelper.setInternalUserNumber(1);
 		tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 	}
 
@@ -79,7 +74,7 @@ public class TestRewardsService {
 			e.printStackTrace();
 		}
 		
-		assertEquals(userRewards.size(), 1);
+		assertEquals(userRewards.size(), getAllAttractions.size());
 	}
 	
 	@Test
@@ -97,22 +92,33 @@ public class TestRewardsService {
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 		Attraction attraction1 = new Attraction("attraction1", "city", "state", 1, 1);
 		Attraction attraction2 = new Attraction("attraction2", "city", "state", 2, 2);
+		Attraction attraction3 = new Attraction("attraction3", "city", "state", 3, 3);
 		
 		List<Attraction> getAllAttractions = new ArrayList<>();
 		getAllAttractions.add(attraction1);
 		getAllAttractions.add(attraction2);
+		getAllAttractions.add(attraction3);
 		
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction1, new Date()));
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction2, new Date()));
+		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction3, new Date()));
 		
+		
+		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
-		
-		
+
 		rewardsService.calculateRewards(user);
 		List<UserReward> userRewards = tourGuideService.getUserRewards(user);
+		
+//		List<UserReward> userRewards = rewardsService.calculateRewardsUser(user);
+		
+
 		tourGuideService.tracker.stopTracking();
 
 		assertEquals(getAllAttractions.size(), userRewards.size());
+		
+		//assertNotNull(userRewards.get(0));
+        //assertNotNull(userRewards.get(0).attraction.attractionId);
 	}
 	
 }

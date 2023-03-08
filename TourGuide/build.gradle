@@ -10,6 +10,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
 
@@ -33,15 +34,17 @@ repositories {
     }
 }
 
-sourceCompatibility = '11'
+sourceCompatibility = 11
+targetCompatibility = 11
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.javamoney:moneta:1.4.2'
 	implementation 'com.jsoniter:jsoniter:0.9.23'
-	// https://mavenlibs.com/maven/dependency/org.mockito/mockito-junit-jupiter
 	implementation 'org.mockito:mockito-junit-jupiter:4.10.0'
+	
+	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 	
     implementation name:'gpsUtil', ext:'jar'
     implementation name:'RewardCentral', ext:'jar'
@@ -49,6 +52,7 @@ dependencies {
     
     testImplementation 'junit:junit'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.6.RELEASE'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.1.0'
 
 }
 
@@ -59,14 +63,9 @@ jacoco {
 
 jacocoTestReport {
     reports {
-    	html{
-    	    enabled true
-    	}
-
-        //xml.required = true
-        //csv.required = false
-        //html.destination file("${buildDir}/jacocoHtml")
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
     }
 }
 
@@ -80,9 +79,7 @@ jacocoTestCoverageVerification {
       limit {
         counter = 'LINE'
         value = 'COVEREDRATIO'
-        //minimum = 0.5
-        //change to 0.2 to avoid error with "gradle jacocoTestCoverageVerification" command in terminal
-        minimum = 0.2
+        minimum = 0.5
       }
     }
   }
