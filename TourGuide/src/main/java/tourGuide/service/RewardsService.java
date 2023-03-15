@@ -1,6 +1,5 @@
 package tourGuide.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,20 +56,6 @@ public class RewardsService {
 		
 		return user.getUserRewards();
 	}
-	
-	
-//	public List<UserReward> calculateRewardsUser(User user) {
-//      
-//		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-//		
-//		executorService.submit(()->{
-//			user.addToVisitedLocations(visitedLocation);
-//			calculateRewards(user);
-//		});
-//			
-//		return user.getUserRewards();
-//    }
-	
 	
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

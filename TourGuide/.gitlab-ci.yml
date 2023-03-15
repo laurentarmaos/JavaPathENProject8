@@ -1,0 +1,20 @@
+image: gradle:alpine
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - echo "Compiling code..."
+    - ./gradlew assemble
+    - echo "Compiling completed"
+    
+    
+test:
+  stage: test
+  script:
+    - echo "Starting tests..."
+    - ./gradlew jacocoTestReport
+    - echo "Tests completed"

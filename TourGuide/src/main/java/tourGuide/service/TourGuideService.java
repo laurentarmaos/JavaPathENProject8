@@ -100,17 +100,13 @@ public class TourGuideService {
 
 		return visitedLocation;
 	}
-
+ 
 	
-
-	
-	
-	
-	
-	
-	
-
-	// get the five closests attractions of user current position
+	/**
+	 * 
+	 * @param visitedLocation
+	 * @return the five closests attractions of user current position
+	 */
 	public List<Attraction> getFiveClosestAttractions(VisitedLocation visitedLocation){
 		List<Attraction> fiveClosest = new ArrayList<>();
 		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
@@ -137,7 +133,14 @@ public class TourGuideService {
 	}
 	
 
-	// get specifics informations of attractions
+	
+	/**
+	 * 
+	 * @param attraction
+	 * @param visitedLocation
+	 * @param user
+	 * @return specifics informations of attractions
+	 */
 	public List<Object> getAttractionsInformations(Attraction attraction, VisitedLocation visitedLocation, User user){
 		List<Object> attractionsInformations = new ArrayList<>();
 
@@ -161,7 +164,12 @@ public class TourGuideService {
 	}
 	
 	
-	//get list of five closests attraction with the informations required
+	/**
+	 * 
+	 * @param visitedLocation
+	 * @param user
+	 * @return list of five closests attraction with the informations required
+	 */
 	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation, User user) {
 		List<Object> informationsNearAttractions = new ArrayList<>();
 		
