@@ -1,5 +1,9 @@
 image: gradle:alpine
 
+before_script:
+  - echo "Start CI"
+  - cd TourGuide
+
 stages:
   - build
   - test
