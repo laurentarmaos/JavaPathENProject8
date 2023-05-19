@@ -51,6 +51,7 @@ dependencies {
     implementation name:'TripPricer', ext:'jar'
     
     testImplementation 'junit:junit'
+    
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.6.RELEASE'
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.1.0'
 

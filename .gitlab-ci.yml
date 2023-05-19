@@ -7,18 +7,31 @@ before_script:
 stages:
   - build
   - test
+  - package
 
 build:
   stage: build
   script:
     - echo "Compiling code..."
     - ./gradlew assemble
-    - echo "Compiling completed"
-    
+    - echo "Compiling completed" 
     
 test:
   stage: test
   script:
     - echo "Starting tests..."
-    - ./gradlew jacocoTestReport
+    - ./gradlew test
     - echo "Tests completed"
+
+package:
+  stage: package
+  script:
+    - echo "Creating jar file"
+    - ./gradlew bootJar
+    - echo "jar file created"
+  artifacts:
+    paths:
+      - TourGuide/build/libs/*.jar
+
+after_script:
+  - echo "End CI "

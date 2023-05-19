@@ -13,7 +13,9 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
@@ -24,16 +26,19 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
+import tripPricer.TripPricer;
 
-
+@ExtendWith(MockitoExtension.class)
 public class TestRewardsService {
 	
 	GpsUtil gpsUtil = mock(GpsUtil.class);
+	
+	TripPricer tripPricer = mock(TripPricer.class);
 		
 	@InjectMocks
 	TourGuideService tourGuideService;
 	
-	@InjectMocks
+	
 	RewardsService rewardsService;
 	
 	@Before
@@ -45,6 +50,7 @@ public class TestRewardsService {
 		tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 	}
 
+	//@Ignore
 	@Test
 	public void userGetRewards() {
 		
