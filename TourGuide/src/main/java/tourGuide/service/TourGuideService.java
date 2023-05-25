@@ -27,6 +27,7 @@ import gpsUtil.location.VisitedLocation;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
@@ -201,6 +202,45 @@ public class TourGuideService {
 		return locations;
 	}
 	
+	
+	public void updateUserPreferences(User user, UserPreferences preferences) {
+		//User user = getUser(userName);
+		
+		UserPreferences actualPreferences = user.getUserPreferences();
+		
+		actualPreferences.setAttractionProximity(preferences.getAttractionProximity());
+			
+		actualPreferences.setHighPricePoint(preferences.getHighPricePoint());
+			
+		actualPreferences.setLowerPricePoint(preferences.getLowerPricePoint());
+				
+		actualPreferences.setNumberOfAdults(preferences.getNumberOfAdults());
+			
+		actualPreferences.setNumberOfChildren(preferences.getNumberOfChildren());
+				
+		actualPreferences.setTicketQuantity(preferences.getTicketQuantity());
+					
+		actualPreferences.setTripDuration(preferences.getTripDuration());
+		
+	}
+	
+	
+	public List<Attraction> attractionsWithinRangePrefs(User user){
+		
+		List<Attraction> attractionsWithinRange = new ArrayList<>();
+		
+		List<Attraction> getAllAttractions = gpsUtil.getAttractions();
+		
+		Location userLocation = getUserLocation(user).location;
+		
+		for(int i = 0; i < getAllAttractions.size(); i++) {
+			if(rewardsService.getDistance(getAllAttractions.get(i), userLocation) < user.getUserPreferences().getAttractionProximity()) {
+				attractionsWithinRange.add(getAllAttractions.get(i));
+			}
+		}
+		
+		return attractionsWithinRange;
+	}
 	
 	
 	private void addShutDownHook() {

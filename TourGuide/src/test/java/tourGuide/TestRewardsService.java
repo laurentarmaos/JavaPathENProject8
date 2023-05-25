@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -35,11 +36,10 @@ public class TestRewardsService {
 	
 	TripPricer tripPricer = mock(TripPricer.class);
 		
+	RewardsService rewardsService;
+	
 	@InjectMocks
 	TourGuideService tourGuideService;
-	
-	
-	RewardsService rewardsService;
 	
 	@Before
 	public void setUp() {
@@ -91,7 +91,7 @@ public class TestRewardsService {
 	
 	//@Ignore // Needs fixed - can throw ConcurrentModificationException
 	@Test
-	public void nearAllAttractions() {
+	public void nearAllAttractions() throws ConcurrentModificationException{
 
 		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 		
@@ -110,7 +110,7 @@ public class TestRewardsService {
 		user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction3, new Date()));
 		
 		
-		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
+		//when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
 
 		rewardsService.calculateRewards(user);

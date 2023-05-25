@@ -30,6 +30,7 @@ import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
+import tourGuide.user.UserPreferences;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
@@ -262,5 +263,55 @@ public class TestTourGuideService {
 		tourGuideService.tracker.stopTracking();
 		assertEquals(loc.size(), InternalTestHelper.getInternalUserNumber()+2);
 	}
+	
+	
+	@Test
+	public void updateUserPreferences() {
+		
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		UserPreferences preferences = new UserPreferences();
+		preferences.setNumberOfAdults(1);
+		preferences.setTripDuration(1);
+		user.setUserPreferences(preferences);
+	
+		
+		UserPreferences updatedPreferences= new UserPreferences();
+		updatedPreferences.setNumberOfAdults(2);
+		
+		tourGuideService.updateUserPreferences(user, updatedPreferences);
+		
+		assertEquals(2, user.getUserPreferences().getNumberOfAdults());
+		
+	}
+	
+	
+	@Test
+	public void attractionsWithinRangePrefs() {
+		
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		UserPreferences preferences = new UserPreferences();
+		preferences.setAttractionProximity(200);
+		user.setUserPreferences(preferences);
+		
+		VisitedLocation userVisitedLocation = new VisitedLocation(user.getUserId(), new Location(0, 0), null);
+		user.getVisitedLocations().add(userVisitedLocation);
+		
+		Attraction attraction1 = new Attraction("attraction1", "city", "state", 1, 1);
+		Attraction attraction2 = new Attraction("attraction2", "city", "state", 2, 2);
+		Attraction attraction3 = new Attraction("attraction3", "city", "state", 100, 100);
+		
+		List<Attraction> getAllAttractions = new ArrayList<>();
+		getAllAttractions.add(attraction1);
+		getAllAttractions.add(attraction2);
+		getAllAttractions.add(attraction3);
+		
+		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
+		
+		List<Attraction> preferencesRangeAttractions = tourGuideService.attractionsWithinRangePrefs(user);
+		
+		assertEquals(2, preferencesRangeAttractions.size());
+		
+	}
+	
 	
 }
