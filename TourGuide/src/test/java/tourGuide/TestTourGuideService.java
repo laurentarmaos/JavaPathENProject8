@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -207,8 +209,6 @@ public class TestTourGuideService {
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 		VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), new Location(0, 0), null);
 		
-		
-		
 		Attraction attraction1 = new Attraction("attraction1", "city", "state", 1, 1);
 		Attraction attraction2 = new Attraction("attraction2", "city", "state", 2, 2);
 		Attraction attraction3 = new Attraction("attraction3", "city", "state", 4, 4);
@@ -228,7 +228,6 @@ public class TestTourGuideService {
 		
 		List<Object> informationsNearAttractions = tourGuideService.getInformationsNearAttractions(visitedLocation, user);
 		
-	
 		tourGuideService.tracker.stopTracking();
 		assertEquals(5, informationsNearAttractions.size());
 	}
@@ -254,14 +253,36 @@ public class TestTourGuideService {
 		VisitedLocation user2visitedLocation3 = new VisitedLocation(user2.getUserId(), new Location(3, 3), null);
 		user2.getVisitedLocations().add(user2visitedLocation1);
 		user2.getVisitedLocations().add(user2visitedLocation2);
-		user2.getVisitedLocations().add(user2visitedLocation3);
+		user2.getVisitedLocations().add(user2visitedLocation3);		
 		
-
 		Map<String, Location> loc = tourGuideService.getAllCurrentLocations();
 
-		
 		tourGuideService.tracker.stopTracking();
 		assertEquals(loc.size(), InternalTestHelper.getInternalUserNumber()+2);
+		assertEquals(loc.get(user1.getUserId().toString()), user1.getLastVisitedLocation().location);
+		assertEquals(loc.get(user2.getUserId().toString()), user2.getLastVisitedLocation().location);
+	}
+	
+	
+	@Test
+	public void trackAllUsers() {
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
+		
+		List<User> allUsers = new ArrayList<User>();
+		allUsers.add(user);
+		allUsers.add(user2);
+		
+		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(new VisitedLocation(user.getUserId(), new Location(1, 1), null));
+		when(gpsUtil.getUserLocation(user2.getUserId())).thenReturn(new VisitedLocation(user2.getUserId(), new Location(2, 2), null));
+		
+		List<VisitedLocation> locations = tourGuideService.trackAllUserLocations();
+		
+		tourGuideService.tracker.stopTracking();
+		
+		for(int i = 0; i< locations.size(); i++) {		
+			assertEquals(allUsers.get(i).getLastVisitedLocation(), locations.get(i));
+		}
 	}
 	
 	
@@ -273,7 +294,6 @@ public class TestTourGuideService {
 		preferences.setNumberOfAdults(1);
 		preferences.setTripDuration(1);
 		user.setUserPreferences(preferences);
-	
 		
 		UserPreferences updatedPreferences= new UserPreferences();
 		updatedPreferences.setNumberOfAdults(2);

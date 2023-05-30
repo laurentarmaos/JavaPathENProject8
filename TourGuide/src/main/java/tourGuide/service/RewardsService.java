@@ -1,8 +1,12 @@
 package tourGuide.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.stereotype.Service;
 
@@ -55,6 +59,24 @@ public class RewardsService {
 		}
 		
 		return user.getUserRewards();
+	}
+	
+	
+	public void calculateRewardsUsers(List<User> users) {
+		
+		Collection<Callable<Object>> tasks = new ArrayList<>();
+		
+		for(User user : users) {
+			tasks.add(()->calculateRewards(user));
+		}
+		
+		try {
+			executorService.invokeAll(tasks);
+			executorService.shutdown();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	

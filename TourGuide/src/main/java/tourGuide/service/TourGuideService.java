@@ -3,12 +3,16 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,6 +105,44 @@ public class TourGuideService {
 
 		return visitedLocation;
 	}
+	
+	
+	public List<VisitedLocation> trackAllUserLocations(){
+		
+		List<User> users = getAllUsers();
+		
+		List<Callable<VisitedLocation>> tasks = new ArrayList<>();
+		
+		for(User user : users) {
+			tasks.add(() -> trackUserLocation(user));
+		}
+		
+		List<Future<VisitedLocation>> listFuture = null;
+		
+		try {
+			listFuture = executorService.invokeAll(tasks);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+				
+		// Get each result of tasks and return it
+        List<VisitedLocation> locations =
+                Objects.requireNonNull(listFuture).stream()
+                        .map(visitedLocationFuture -> {
+                            try {
+                                return visitedLocationFuture.get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                                Thread.currentThread().interrupt();
+                            }
+                            return null;
+                        })
+                        .collect(Collectors.toList());
+        
+        executorService.shutdown();
+        
+        return locations;		
+	}
  
 	
 	/**
@@ -174,18 +216,11 @@ public class TourGuideService {
 	public List<Object> getInformationsNearAttractions(VisitedLocation visitedLocation, User user) {
 		List<Object> informationsNearAttractions = new ArrayList<>();
 		
-		Future<List<Attraction>> future = executorService.submit(()->getFiveClosestAttractions(visitedLocation));
+		List<Attraction> attractions = getFiveClosestAttractions(visitedLocation);	
 		
-		try {
-			for(int i = 0; i < future.get().size(); i++) {
-							
-				informationsNearAttractions.add(getAttractionsInformations(future.get().get(i), visitedLocation, user));
-
-			}
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		for(int i = 0; i < attractions.size(); i++) {			
+			informationsNearAttractions.add(getAttractionsInformations(attractions.get(i), visitedLocation, user));
 		}
-
 				
 		return informationsNearAttractions;
 	}
@@ -195,7 +230,7 @@ public class TourGuideService {
 		Map<String, Location> locations = new HashMap<>();
 		for(User user : getAllUsers()) {
 			String userId = user.getUserId().toString();
-			Location location = getUserLocation(user).location;
+			Location location = user.getLastVisitedLocation().location;
 			locations.put(userId, location);
 		}
 		
@@ -203,8 +238,10 @@ public class TourGuideService {
 	}
 	
 	
-	public void updateUserPreferences(User user, UserPreferences preferences) {
-		//User user = getUser(userName);
+	
+	public User updateUserPreferences(User user, UserPreferences preferences) {
+		
+		User userUpdatedPreferences = user;
 		
 		UserPreferences actualPreferences = user.getUserPreferences();
 		
@@ -221,6 +258,8 @@ public class TourGuideService {
 		actualPreferences.setTicketQuantity(preferences.getTicketQuantity());
 					
 		actualPreferences.setTripDuration(preferences.getTripDuration());
+		
+		return userUpdatedPreferences;
 		
 	}
 	
