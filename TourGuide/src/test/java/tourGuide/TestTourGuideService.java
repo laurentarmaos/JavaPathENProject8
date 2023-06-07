@@ -276,7 +276,7 @@ public class TestTourGuideService {
 		when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(new VisitedLocation(user.getUserId(), new Location(1, 1), null));
 		when(gpsUtil.getUserLocation(user2.getUserId())).thenReturn(new VisitedLocation(user2.getUserId(), new Location(2, 2), null));
 		
-		List<VisitedLocation> locations = tourGuideService.trackAllUserLocations();
+		List<VisitedLocation> locations = tourGuideService.trackAllUserLocations(allUsers);
 		
 		tourGuideService.tracker.stopTracking();
 		
@@ -333,5 +333,21 @@ public class TestTourGuideService {
 		
 	}
 	
+	@Test
+	public void getAllLocationsUser() {
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		VisitedLocation visitedLocation1 = new VisitedLocation(user.getUserId(), new Location(0, 0), null);
+		VisitedLocation visitedLocation2 = new VisitedLocation(user.getUserId(), new Location(1, 1), null);
+		user.getVisitedLocations().add(visitedLocation1);
+		user.getVisitedLocations().add(visitedLocation2);
+		
+		List<VisitedLocation> locations = new ArrayList<VisitedLocation>();
+		locations.add(visitedLocation1);
+		locations.add(visitedLocation2);
+		
+		assertEquals(locations.size(), user.getVisitedLocations().size());
+		assertEquals(locations.get(0), user.getVisitedLocations().get(0));
+		assertEquals(locations.get(1), user.getVisitedLocations().get(1));
+	}
 	
 }

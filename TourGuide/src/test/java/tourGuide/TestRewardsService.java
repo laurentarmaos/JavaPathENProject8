@@ -69,11 +69,10 @@ public class TestRewardsService {
 		//when(gpsUtil.getUserLocation(user.getUserId())).thenReturn(user.getLastVisitedLocation());
 		when(gpsUtil.getAttractions()).thenReturn(getAllAttractions);
 		
-		//tourGuideService.trackUserLocation(user);
 		rewardsService.calculateRewards(user);
 		
 		List<UserReward> userRewards = rewardsService.calculateRewards(user);
-		//List<UserReward> userRewards = user.getUserRewards();
+
 		tourGuideService.tracker.stopTracking();
 		
 //		try {

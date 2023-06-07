@@ -3,16 +3,13 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,19 +95,15 @@ public class TourGuideService {
 		
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 		
-		executorService.submit(()->{
-			user.addToVisitedLocations(visitedLocation);
-			rewardsService.calculateRewards(user);
-		});
+		user.addToVisitedLocations(visitedLocation);
+		rewardsService.calculateRewards(user);
 
 		return visitedLocation;
 	}
 	
 	
-	public List<VisitedLocation> trackAllUserLocations(){
-		
-		List<User> users = getAllUsers();
-		
+	public List<VisitedLocation> trackAllUserLocations(List<User> users){
+			
 		List<Callable<VisitedLocation>> tasks = new ArrayList<>();
 		
 		for(User user : users) {
@@ -126,11 +119,10 @@ public class TourGuideService {
 		}
 				
 		// Get each result of tasks and return it
-        List<VisitedLocation> locations =
-                Objects.requireNonNull(listFuture).stream()
-                        .map(visitedLocationFuture -> {
+        List<VisitedLocation> locations = listFuture.stream()
+                        .map(m -> {
                             try {
-                                return visitedLocationFuture.get();
+                                return m.get();
                             } catch (InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
                                 Thread.currentThread().interrupt();
@@ -237,6 +229,10 @@ public class TourGuideService {
 		return locations;
 	}
 	
+	
+	public List<VisitedLocation> getAllLocationsUser(User user){
+		return user.getVisitedLocations();
+	}
 	
 	
 	public User updateUserPreferences(User user, UserPreferences preferences) {
